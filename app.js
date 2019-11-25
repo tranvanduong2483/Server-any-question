@@ -92,14 +92,13 @@ function getExpert(callback) {
 function getFilenameImage(id) {
   let date = new Date();
   let mSec = date.getTime();
-  return process.env.HOME + "/public/images/" + id.substring(2) + mSec + ".png";
+  let x =  process.env.HOME + "/public/images/" + id.substring(2) + mSec + ".png";
+  console.log("tesst:" +x);
+  return x;
 }
 
-
-
-
 function saveImage(str_image, callback) {
-  const buf = new Buffer(str_image, 'base64');
+  const buf = new Buffer.from(str_image, 'base64');
   const filename = getFilenameImage("question_image" + Math.random() * 9999);
 
   fs.writeFile(filename, buf, function (err) {
