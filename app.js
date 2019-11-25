@@ -5,11 +5,14 @@ io = require("socket.io").listen(server);
 mysql = require('mysql');
 fs = require("fs");
 
-var port = process.env.PORT || 8000;
+app.set('port', process.env.PORT || 26398); //<--- replace with your port number
 
-server.listen(port, function() {
-  console.log("App is running on port " + port);
+// Server
+server.listen(app.get('port'), function(){
+  console.log('Express server listening on port ' + app.get('port'));
 });
+
+module.exports = app;
 
 con = mysql.createConnection({
   host: "remotemysql.com",
