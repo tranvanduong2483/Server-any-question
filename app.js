@@ -5,6 +5,11 @@ io = require("socket.io").listen(server);
 mysql = require('mysql');
 fs = require("fs");
 
+
+path = require('path');
+
+
+
 app.set('port', process.env.PORT || 26398); //<--- replace with your port number
 
 // Server
@@ -87,8 +92,7 @@ function getExpert(callback) {
 function getFilenameImage(id) {
   let date = new Date();
   let mSec = date.getTime();
-
-  return __dirname + "/public/images/" + id.substring(2) + mSec + ".png";
+  return path.join(__dirname, 'public/images/', id.substring(2) + mSec + ".png");
 }
 
 
