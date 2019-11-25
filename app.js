@@ -92,8 +92,7 @@ function getExpert(callback) {
 function getFilenameImage(id) {
   let date = new Date();
   let mSec = date.getTime();
-  let x =  process.env.HOME + "/public/images/" + id.substring(2) + mSec + ".png";
-  console.log("tesst:" +x);
+  let x =  __dirname + "/public/images/" + id.substring(2) + mSec + ".png";
   return x;
 }
 
@@ -250,8 +249,9 @@ io.sockets.on('connection', function (socket) {
           socket.emit('server-to-update-status', {status: 0});
           console.log('error', err);
         } else {
+          console.log(SQL);
           con.query(SQL, function (err, rows, result) {
-            if (rows.length !== 0) {
+            if (!err) {
               socket.emit('server-to-update-status', {status: 1});
             } else {
               socket.emit('server-to-update-status', {status: 0});
