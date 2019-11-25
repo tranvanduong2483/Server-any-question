@@ -92,7 +92,7 @@ function getExpert(callback) {
 function getFilenameImage(id) {
   let date = new Date();
   let mSec = date.getTime();
-  return path.join("./"+__dirname, 'public/images/', id.substring(2) + mSec + ".png");
+  return process.env.HOME + "/public/images/" + id.substring(2) + mSec + ".png";
 }
 
 
