@@ -18,11 +18,11 @@ module.exports = app;
 
 
 con = mysql.createConnection({
-    host: "remotemysql.com",
+    host: "db4free.net",
     port: 3306,
-    user: "Hme0LP2Gb1",
-    password: "AJnZfe3CLb",
-    database: "Hme0LP2Gb1"
+    user: "tranvanduong",
+    password: "123456789",
+    database: "anyquestion"
 });
 
 
@@ -423,6 +423,8 @@ io.sockets.on('connection', function (socket) {
     const newpassword = arguments[3];
     let SQL="";
 
+      console.log(type);
+
     if (type==="user") {
       SQL = `UPDATE User SET Password = '${newpassword}' 
             WHERE user_id = '${account}' AND Password ='${oldpassword}';`;
@@ -430,6 +432,9 @@ io.sockets.on('connection', function (socket) {
       SQL = `UPDATE Expert SET Password = '${newpassword}' 
                 WHERE expert_id = '${account}' AND Password ='${oldpassword}';`;
     }
+
+
+      console.log(SQL);
 
     con.query(SQL, function (err, rows, result) {
       if (rows.affectedRows !== 0) {
@@ -505,6 +510,24 @@ io.sockets.on('connection', function (socket) {
                 //console.log(rows);
                 socket.emit("server-sent-list-history", rows);
             }
+        });
+    });
+
+
+    socket.on('get-list-bxh', function () {
+        console.log("GETBXH")
+        let SQL = `SELECT Expert.expert_id,Field.name, BXH.conversation_number, BXH.AverageStars
+            FROM Expert
+            INNER JOIN BXH ON BXH.expert_id = Expert.expert_id
+            INNER JOIN Field ON Expert.field_id = Field.field_id
+            ORDER BY BXH.AverageStars ASC, BXH.conversation_number ASC;`;
+
+        con.query(SQL, function (err, rows, result) {
+            if (rows.length !== 0) {
+                socket.emit("server-sent-list-bxh", rows);
+            }
+
+            //console.log(rows);
         });
     });
 

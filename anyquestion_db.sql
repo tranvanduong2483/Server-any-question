@@ -38,7 +38,6 @@ CREATE TABLE `Expert` (
   `Password` varchar(50) NOT NULL,
   `FullName` varchar(50) NOT NULL,
   `avatar` varchar(500),
-  `AverageStars` varchar(50),
   `education_id` int NOT NULL,
   `field_id` int NOT NULL,
   `Address` varchar(50),
@@ -92,7 +91,7 @@ CREATE TABLE `Conversation` (
   `id_expert` varchar(50) NOT NULL,
   `starttime` datetime NOT NULL,
   `public` boolean NOT NULL,
-  `star` int DEFAULT 5,
+  `star` float DEFAULT 5,
   PRIMARY KEY (`conversation_id`, `question_id`)
 );
 
@@ -176,6 +175,23 @@ ALTER TABLE `Question` ADD FOREIGN KEY (`user_id`) REFERENCES `User` (`user_id`)
 
 
 
+CREATE TABLE `BXH` (
+  `bxh_id` int PRIMARY KEY AUTO_INCREMENT,
+  `expert_id` varchar(50) NULL,
+  `conversation_number` int DEFAULT 0,
+  `AverageStars` float DEFAULT 0,
+   CONSTRAINT FK_PersonOrde777r FOREIGN KEY (expert_id) REFERENCES Expert(expert_id)
+);
+
+
+DELIMITER $$
+	create trigger thembanxephang after insert on Expert  FOR each row
+	BEGIN
+	    insert into BXH (expert_id) values (new.expert_id);
+	END$$
+DELIMITER ;
+
+
 
 INSERT INTO `Education` (`education_id`, `name`) VALUES (NULL, 'Trung học cơ sở');
 INSERT INTO `Education` (`education_id`, `name`) VALUES (NULL, 'Trung học phổ thông');
@@ -207,20 +223,20 @@ INSERT INTO `SecurityQuestion` (`security_question_id`, `content`) VALUES (NULL,
 INSERT INTO `SecurityQuestion` (`security_question_id`, `content`) VALUES (NULL, 'Ba mẹ bạn gặp nhau lần đầu tiên ở đâu?');
 INSERT INTO `SecurityQuestion` (`security_question_id`, `content`) VALUES (NULL, 'Bạn thích loại động vật nào?');
 
-INSERT INTO `Expert` (`expert_id`, `Password`, `FullName`, `avatar`, `AverageStars`, `education_id`, `field_id`, `Address`, `Email`, `Verified`, `money`)
-VALUES ('phamminhtuan1', '1', 'Phạm Minh Tuấn 1', NULL, NULL, '8', '1', '71 Đồng Kè', 'phamminhtuan1@gmail.com', '1', '50000');
+INSERT INTO `Expert` (`expert_id`, `Password`, `FullName`, `avatar`, `education_id`, `field_id`, `Address`, `Email`, `Verified`, `money`)
+VALUES ('phamminhtuan1', '1', 'Phạm Minh Tuấn 1', NULL, '8', '1', '71 Đồng Kè', 'phamminhtuan1@gmail.com', '1', '50000');
 
-INSERT INTO `Expert` (`expert_id`, `Password`, `FullName`, `avatar`, `AverageStars`, `education_id`, `field_id`, `Address`, `Email`, `Verified`, `money`)
-VALUES ('phamminhtuan2', '1', 'Phạm Minh Tuấn 2', NULL, NULL, '8', '1', '47 Tôn Đức Thắng', 'phamminhtuan2@gmail.com', '1', '100000');
+INSERT INTO `Expert` (`expert_id`, `Password`, `FullName`, `avatar`, `education_id`, `field_id`, `Address`, `Email`, `Verified`, `money`)
+VALUES ('phamminhtuan2', '1', 'Phạm Minh Tuấn 2', NULL, '8', '1', '47 Tôn Đức Thắng', 'phamminhtuan2@gmail.com', '1', '100000');
 
-INSERT INTO `Expert` (`expert_id`, `Password`, `FullName`, `avatar`, `AverageStars`, `education_id`, `field_id`, `Address`, `Email`, `Verified`, `money`)
-VALUES ('phamminhtuan3', '1', 'Phạm Minh Tuấn 3', NULL, NULL, '8', '1', '55 Nguyễn Lương Bằng', 'phamminhtuan3@gmail.com', '1', '200000');
+INSERT INTO `Expert` (`expert_id`, `Password`, `FullName`, `avatar`, `education_id`, `field_id`, `Address`, `Email`, `Verified`, `money`)
+VALUES ('phamminhtuan3', '1', 'Phạm Minh Tuấn 3', NULL, '8', '1', '55 Nguyễn Lương Bằng', 'phamminhtuan3@gmail.com', '1', '200000');
 
-INSERT INTO `Expert` (`expert_id`, `Password`, `FullName`, `avatar`, `AverageStars`, `education_id`, `field_id`, `Address`, `Email`, `Verified`, `money`)
-VALUES ('phamminhtuan4', '1', 'Phạm Minh Tuấn 4', NULL, NULL, '8', '1', '78 Điện Biên Phủ', 'phamminhtuan4@gmail.com', '1', '30000');
+INSERT INTO `Expert` (`expert_id`, `Password`, `FullName`, `avatar`, `education_id`, `field_id`, `Address`, `Email`, `Verified`, `money`)
+VALUES ('phamminhtuan4', '1', 'Phạm Minh Tuấn 4', NULL, '8', '1', '78 Điện Biên Phủ', 'phamminhtuan4@gmail.com', '1', '30000');
 
-INSERT INTO `Expert` (`expert_id`, `Password`, `FullName`, `avatar`, `AverageStars`, `education_id`, `field_id`, `Address`, `Email`, `Verified`, `money`)
-VALUES ('phamminhtuan5', '1', 'Phạm Minh Tuấn 5', NULL, NULL, '8', '1', '11 Nguyễn Văn Linh', 'phamminhtuan4@gmail.com', '1', '89000');
+INSERT INTO `Expert` (`expert_id`, `Password`, `FullName`, `avatar`, `education_id`, `field_id`, `Address`, `Email`, `Verified`, `money`)
+VALUES ('phamminhtuan5', '1', 'Phạm Minh Tuấn 5', NULL, '8', '1', '11 Nguyễn Văn Linh', 'phamminhtuan4@gmail.com', '1', '89000');
 
 INSERT INTO `User` (`user_id`, `Password`, `FullName`, `avatar`, `Address`, `Email`, `money`) VALUES ('duong', '1', 'Trần Văn Dương', NULL, 'Huế', 'tranvanduong2483@gmail.com', '50000');
 INSERT INTO `User` (`user_id`, `Password`, `FullName`, `avatar`, `Address`, `Email`, `money`) VALUES ('nhu', '1', 'Nguyễn Thị Khánh Như', NULL, 'Hà Nội', 'khanhnhu@gmail.com', '50000');
