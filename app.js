@@ -572,11 +572,7 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('logout', function () {
-        let pos = list_login.indexOf(socket.id);
-        if (pos !== -1) {
-            list_login.splice(pos, 1);
-            console.log(socket.id + " (" + socket.type + ")" + ": logout");
-        }
+        remove_list_login(socket);
 
         if (socket.type === "expert") {
             socket.ready = "false";
