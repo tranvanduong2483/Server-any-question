@@ -39,7 +39,7 @@ list_login = [];
 function remove_list_login(socket) {
     let pos = -1;
     for (let i = 0; i < list_login.length; i++) {
-        if (list_login[i].account === socket.account) {
+        if (list_login[i].id === socket.id) {
             pos = i;
             break;
         }
@@ -47,6 +47,15 @@ function remove_list_login(socket) {
 
     if (pos === -1) return null;
     list_login.splice(pos, 1);
+}
+
+
+function show_lis_login() {
+    let list_tmp = [];
+    for (let i = 0; i < list_login.length; i++) {
+       list_tmp.push(list_login[i].account);
+    }
+    console.log("Danh sach dang nhap: "+ list_tmp);
 }
 
 function getIDconnectionfromUsername(Username) {
@@ -60,7 +69,7 @@ function getIDconnectionfromUsername(Username) {
 function TurnReady(socket, ready) {
     let pos = -1;
     for (let i = 0; i < list_expert_ready.length; i++) {
-        if (list_expert_ready[i].account === socket.account) {
+        if (list_expert_ready[i].id === socket.id) {
             pos = i;
             break;
         }
@@ -84,7 +93,7 @@ function getExpert(callback) {
     if (list_expert_ready.length === 0) return callback(true, null);
     let i = Math.floor(Math.random() * list_expert_ready.length); // tra ve mot so nguyen ngau nhien tu 0 den 9
     return callback(false, list_expert_ready[i]);
-};
+}
 
 function getFilenameImage(id) {
     let date = new Date();
@@ -106,6 +115,8 @@ function saveImage(str_image, callback) {
 
 io.sockets.on('connection', function (socket) {
 
+    console.log("Connect: " + socket.id);
+
     socket.on('client-dang-ki-user', function (json_str) {
         const User = JSON.parse(json_str);
         const SQL = `INSERT INTO User (user_id, Password, FullName, Address, Email)
@@ -119,17 +130,15 @@ io.sockets.on('connection', function (socket) {
     socket.on('client-dang-ki-expert', function (json_str) {
         const Expert = JSON.parse(json_str);
         const SQL = `INSERT INTO Expert (Account, Password, FullName, Education, Field, Address, Email) 
-    VALUES ('${Expert.Account}', '${Expert.Password}', '${Expert.FullName}', '${Expert.Education}', '${Expert.Field}', '${Expert.Address}', '${Expert.Email}');`;
+                VALUES ('${Expert.Account}', '${Expert.Password}', '${Expert.FullName}', '${Expert.Education}', '${Expert.Field}', '${Expert.Address}', '${Expert.Email}');`;
         con.query(SQL, function (err) {
             socket.emit('ket-qua-dang-ki-expert', {ketqua: !err});
         });
     });
 
     socket.on('client-dang-nhap', function (data) {
-
         const ThongTinDangNhap = JSON.parse(data);
         console.log(ThongTinDangNhap.username);
-
 
         const sql1 = `SELECT * FROM User WHERE user_id='${ThongTinDangNhap.username}' and Password ='${ThongTinDangNhap.password}'`;
         const sql2 = `SELECT * FROM Expert WHERE expert_id ='${ThongTinDangNhap.username}' and Password ='${ThongTinDangNhap.password}'`;
@@ -137,7 +146,7 @@ io.sockets.on('connection', function (socket) {
             if (rows.length !== 0) {
                 socket.account = ThongTinDangNhap.username;
                 socket.type = "user";
-                list_login.push(socket.account);
+                list_login.push(socket);
 
                 if (rows[0].avatar === null) rows[0].avatar = "";
 
@@ -150,6 +159,8 @@ io.sockets.on('connection', function (socket) {
                         socket.emit('ket-qua-dang-nhap', {ketqua: rows[0], type: socket.type}, data);
                     }
                 });
+
+                show_lis_login();
             } else {
                 con.query(sql2, function (err, rows) {
                     if (rows.length === 0) {
@@ -157,7 +168,7 @@ io.sockets.on('connection', function (socket) {
                     } else {
                         socket.account = ThongTinDangNhap.username;
                         socket.type = "expert";
-                        list_login.push(socket.account);
+                        list_login.push(socket);
                         if (rows[0].avatar === null) rows[0].avatar = "";
 
                         fs.readFile(rows[0].avatar, function (err, data) {
@@ -171,11 +182,12 @@ io.sockets.on('connection', function (socket) {
                         });
 
                     }
+
+                    show_lis_login();
                 });
             }
         });
 
-        console.log("Danh sách đăng nhập: " + list_login);
     });
 
     socket.on('client-send-message-to-other-people', function (message_json) {
@@ -263,6 +275,7 @@ io.sockets.on('connection', function (socket) {
     socket.on('user-search-expert', function (question_json) {
         const question = JSON.parse(question_json);
         socket.account = question.from;
+
         list_login.push(socket);
 
         saveImage(question.imageString, function (err, filename) {
@@ -569,18 +582,22 @@ io.sockets.on('connection', function (socket) {
         }
 
         remove_list_login(socket);
+        show_lis_login();
     });
 
     socket.on('logout', function () {
-        remove_list_login(socket);
+
 
         if (socket.type === "expert") {
             socket.ready = "false";
             TurnReady(socket);
         }
 
-        socket.emit("ketqua-logout", {ketqua: true})
-        console.log("Danh sách đăng nhập: " + list_login);
+        socket.emit("ketqua-logout", {ketqua: true});
+
+        remove_list_login(socket);
+        show_lis_login();
+
     });
 });
 
