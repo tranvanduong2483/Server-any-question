@@ -36,10 +36,10 @@ list_expert_ready = [];
 list_login = [];
 
 
-function remove_list_login(Username) {
+function remove_list_login(socket) {
     let pos = -1;
     for (let i = 0; i < list_login.length; i++) {
-        if (list_login[i].account === Username) {
+        if (list_login[i].account === socket.account) {
             pos = i;
             break;
         }
