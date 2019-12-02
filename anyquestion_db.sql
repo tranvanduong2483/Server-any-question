@@ -1,16 +1,17 @@
-CREATE DATABASE AnyQuestion_DB2222222 CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+CREATE DATABASE AnyQuestion_DB222222222222333 CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
-USE AnyQuestion_DB2222222;
+USE AnyQuestion_DB222222222222333;
 
 CREATE TABLE `Field` (
   `field_id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(50) NOT NULL
 );
 
-CREATE TABLE `Keyword` (
-  `keyword_id` int PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE `Introduction` (
+  `introduction_id` int PRIMARY KEY AUTO_INCREMENT,
   `expert_id` varchar(50) NOT NULL,
-  `keywords` varchar(1000) NOT NULL
+  `keywords` varchar(1000) NOT NULL,
+  `introduction_message` varchar(1000) NOT NULL
 );
 
 CREATE TABLE `SecurityQuestion` (
@@ -152,7 +153,7 @@ ALTER TABLE `Expert` ADD FOREIGN KEY (`education_id`) REFERENCES `Education` (`e
 
 ALTER TABLE `Expert` ADD FOREIGN KEY (`field_id`) REFERENCES `Field` (`field_id`);
 
-ALTER TABLE `Keyword` ADD FOREIGN KEY (`expert_id`) REFERENCES `Expert` (`expert_id`);
+ALTER TABLE `Introduction` ADD FOREIGN KEY (`expert_id`) REFERENCES `Expert` (`expert_id`);
 
 ALTER TABLE `Expert_Verification` ADD FOREIGN KEY (`from_id`) REFERENCES `Admin` (`admin_id`);
 
@@ -188,8 +189,12 @@ DELIMITER $$
 	create trigger thembanxephang after insert on Expert  FOR each row
 	BEGIN
 	    insert into BXH (expert_id) values (new.expert_id);
+       	insert into Introduction (expert_id, keywords, introduction_message) values (new.expert_id,'','Xin chào tôi là chuyên gia của bạn');
+
 	END$$
 DELIMITER ;
+
+
 
 
 
