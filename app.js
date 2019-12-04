@@ -201,7 +201,8 @@ io.sockets.on('connection', function (socket) {
 
     });
 
-    socket.on('client-send-message-to-other-people', function (message_json) {
+    socket.on('client-send-message-to-other-people', function () {
+        const message_json = arguments[0];
         if (socket.id_ketnoi === undefined || socket.id_ketnoi === null) return;
         const message = JSON.parse(message_json);
 
@@ -215,17 +216,26 @@ io.sockets.on('connection', function (socket) {
             });
         } else {
             saveImage(message.message, function (err, filename) {
-                if (err) return;
+                if (err) {
+                    console.log("Lỗi gửi ảnh, không lưu đc ảnh.");
+                    socket.emit("send-image-complete",arguments[1],"error");
+                    return;
+                }
                 message.message = filename;
 
                 const SQL = `INSERT INTO Messages (conversation_id, sender, message, typeImage) VALUES ('${message.conversation_id}', '${message.sender}', '${message.message}', '${message.typeImage === true ? 1 : 0}');`;
 
                 con.query(SQL, function (err, result) {
-                    if (err) throw err;
+                    if (err) {
+                        console.log("Lỗi gửi ảnh, không lưu filename vào MySQL.");
+                        socket.emit("send-image-complete",arguments[1],"error");
+                        throw err;
+                    }
                     socket.to(socket.id_ketnoi).emit("server-send-message", {message: message_json});
-                    console.log("tin nhan image");
+                    console.log("tin nhan image - " + arguments[1]);
 
-                    socket.emit("send-image-complete",arguments[1]);
+                    console.log("Gửi ảnh lên server ok");
+                    socket.emit("send-image-complete",arguments[1],"ok");
 
                 });
 
