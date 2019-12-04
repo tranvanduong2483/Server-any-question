@@ -203,6 +203,7 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('client-send-message-to-other-people', function () {
         const message_json = arguments[0];
+        const position = arguments[1];
         if (socket.id_ketnoi === undefined || socket.id_ketnoi === null) return;
         const message = JSON.parse(message_json);
 
@@ -218,7 +219,7 @@ io.sockets.on('connection', function (socket) {
             saveImage(message.message, function (err, filename) {
                 if (err) {
                     console.log("Lỗi gửi ảnh, không lưu đc ảnh.");
-                    socket.emit("send-image-complete",arguments[1],"error");
+                    socket.emit("send-image-complete",position,"error");
                     return;
                 }
                 message.message = filename;
@@ -228,14 +229,14 @@ io.sockets.on('connection', function (socket) {
                 con.query(SQL, function (err, result) {
                     if (err) {
                         console.log("Lỗi gửi ảnh, không lưu filename vào MySQL.");
-                        socket.emit("send-image-complete",arguments[1],"error");
+                        socket.emit("send-image-complete",position,"error");
                         throw err;
                     }
                     socket.to(socket.id_ketnoi).emit("server-send-message", {message: message_json});
-                    console.log("tin nhan image - " + arguments[1]);
+                    console.log("tin nhan image - " + position);
 
                     console.log("Gửi ảnh lên server ok");
-                    socket.emit("send-image-complete",arguments[1],"ok");
+                    socket.emit("send-image-complete",position,"ok");
 
                 });
 
