@@ -1,6 +1,27 @@
-CREATE DATABASE AnyQuestion_DB222222222222333 CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+CREATE DATABASE AnyQuestion_DBmm CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
-USE AnyQuestion_DB222222222222333;
+USE AnyQuestion_DBmm;
+
+CREATE TABLE `AnyQuestionCard` (
+  `card_id` int PRIMARY KEY AUTO_INCREMENT,
+  `serial` varchar(10)  NULL,
+  `card_code` varchar(10) NULL,
+  `value` int not null,
+  `date_created` date null,
+  `expiry_date` date null
+);
+
+
+CREATE TRIGGER before_insert_AnyQuestionCard
+  before  INSERT ON AnyQuestionCard
+  FOR EACH ROW
+  SET new.date_created = CURDATE(),
+  new.expiry_date = DATE_ADD(CURDATE(), INTERVAL 5 YEAR),
+  new.serial = LEFT(MD5(CONCAT(NOW(), rand())),10),
+  new.card_code = FLOOR(RAND()*(9999999999-1111111111+1)+1111111111);
+
+
+
 
 CREATE TABLE `Field` (
   `field_id` int PRIMARY KEY AUTO_INCREMENT,
@@ -33,6 +54,41 @@ CREATE TABLE `User` (
   `Email` varchar(50) NOT NULL,
   `money` int DEFAULT 50000
 );
+
+
+CREATE TABLE `CardUsageHistory` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `user_id` varchar(50) NOT NULL,
+  `card_id` int Not null,
+  `time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT FK_CardUsageHistoryID FOREIGN KEY (user_id) REFERENCES User(user_id),
+  CONSTRAINT FK_CardUsageHistoryCardID FOREIGN KEY (card_id) REFERENCES AnyQuestionCard(card_id)
+);
+
+
+DELIMITER $$
+CREATE TRIGGER after_insert_CardUsageHistory
+  after INSERT ON CardUsageHistory
+  FOR EACH ROW
+  BEGIN
+
+      DECLARE add_money INT DEFAULT 0;
+
+      SELECT value INTO add_money
+      FROM AnyQuestionCard
+      where card_id = new.card_id;
+
+      update User
+      SET money = money +add_money
+      Where user_id  = new.user_id;
+
+  END$$
+DELIMITER ;
+
+
+
+
 
 CREATE TABLE `Expert` (
   `expert_id` varchar(50) PRIMARY KEY NOT NULL,
@@ -90,11 +146,33 @@ CREATE TABLE `Conversation` (
   `question_id` int NOT NULL,
   `id_user` varchar(50) NOT NULL,
   `id_expert` varchar(50) NOT NULL,
-  `starttime` datetime NOT NULL,
+  `starttime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `finishtime` TIMESTAMP NULL,
   `public` boolean NOT NULL,
   `star` float DEFAULT 5,
   PRIMARY KEY (`conversation_id`, `question_id`)
 );
+
+
+DELIMITER $$
+CREATE TRIGGER after_insert_Conversation
+  after INSERT ON Conversation
+  FOR EACH ROW
+  BEGIN
+
+      DECLARE cost INT DEFAULT 0;
+
+      SELECT money INTO cost
+      FROM Question
+      where question_id = new.question_id;
+
+      update User
+      SET money = money - cost
+      Where user_id  = new.id_user;
+
+  END$$
+DELIMITER ;
+
 
 CREATE TABLE `Messages` (
   `messages_id` int PRIMARY KEY AUTO_INCREMENT,
@@ -102,8 +180,24 @@ CREATE TABLE `Messages` (
   `sender` varchar(50),
   `message` varchar(1000) NOT NULL,
   `typeImage` boolean DEFAULT 0,
-  `time` datetime NOT NULL
+  `time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+
+
+DELIMITER $$
+CREATE TRIGGER after_insert_Messages
+  after INSERT ON Messages
+  FOR EACH ROW
+  BEGIN
+      update Conversation
+      SET finishtime = CURRENT_TIMESTAMP()
+      Where conversation_id  = new.conversation_id;
+
+  END$$
+DELIMITER ;
+
 
 CREATE TABLE `Report` (
   `report_id` int PRIMARY KEY AUTO_INCREMENT,
@@ -198,6 +292,79 @@ DELIMITER ;
 
 
 
+INSERT INTO AnyQuestionCard (value) VALUES (10000);
+INSERT INTO AnyQuestionCard (value) VALUES (10000);
+INSERT INTO AnyQuestionCard (value) VALUES (10000);
+INSERT INTO AnyQuestionCard (value) VALUES (10000);
+INSERT INTO AnyQuestionCard (value) VALUES (10000);
+INSERT INTO AnyQuestionCard (value) VALUES (10000);
+INSERT INTO AnyQuestionCard (value) VALUES (10000);
+INSERT INTO AnyQuestionCard (value) VALUES (10000);
+INSERT INTO AnyQuestionCard (value) VALUES (10000);
+INSERT INTO AnyQuestionCard (value) VALUES (10000);
+
+
+INSERT INTO AnyQuestionCard (value) VALUES (20000);
+INSERT INTO AnyQuestionCard (value) VALUES (20000);
+INSERT INTO AnyQuestionCard (value) VALUES (20000);
+INSERT INTO AnyQuestionCard (value) VALUES (20000);
+INSERT INTO AnyQuestionCard (value) VALUES (20000);
+INSERT INTO AnyQuestionCard (value) VALUES (20000);
+INSERT INTO AnyQuestionCard (value) VALUES (20000);
+INSERT INTO AnyQuestionCard (value) VALUES (20000);
+
+
+
+INSERT INTO AnyQuestionCard (value) VALUES (50000);
+INSERT INTO AnyQuestionCard (value) VALUES (50000);
+INSERT INTO AnyQuestionCard (value) VALUES (50000);
+INSERT INTO AnyQuestionCard (value) VALUES (50000);
+INSERT INTO AnyQuestionCard (value) VALUES (50000);
+INSERT INTO AnyQuestionCard (value) VALUES (50000);
+INSERT INTO AnyQuestionCard (value) VALUES (50000);
+INSERT INTO AnyQuestionCard (value) VALUES (50000);
+INSERT INTO AnyQuestionCard (value) VALUES (50000);
+INSERT INTO AnyQuestionCard (value) VALUES (50000);
+INSERT INTO AnyQuestionCard (value) VALUES (50000);
+
+INSERT INTO AnyQuestionCard (value) VALUES (100000);
+INSERT INTO AnyQuestionCard (value) VALUES (100000);
+INSERT INTO AnyQuestionCard (value) VALUES (100000);
+INSERT INTO AnyQuestionCard (value) VALUES (100000);
+INSERT INTO AnyQuestionCard (value) VALUES (100000);
+INSERT INTO AnyQuestionCard (value) VALUES (100000);
+INSERT INTO AnyQuestionCard (value) VALUES (100000);
+INSERT INTO AnyQuestionCard (value) VALUES (100000);
+INSERT INTO AnyQuestionCard (value) VALUES (100000);
+INSERT INTO AnyQuestionCard (value) VALUES (100000);
+INSERT INTO AnyQuestionCard (value) VALUES (100000);
+
+INSERT INTO AnyQuestionCard (value) VALUES (200000);
+INSERT INTO AnyQuestionCard (value) VALUES (200000);
+INSERT INTO AnyQuestionCard (value) VALUES (200000);
+INSERT INTO AnyQuestionCard (value) VALUES (200000);
+INSERT INTO AnyQuestionCard (value) VALUES (200000);
+INSERT INTO AnyQuestionCard (value) VALUES (200000);
+INSERT INTO AnyQuestionCard (value) VALUES (200000);
+INSERT INTO AnyQuestionCard (value) VALUES (200000);
+
+INSERT INTO AnyQuestionCard (value) VALUES (500000);
+INSERT INTO AnyQuestionCard (value) VALUES (500000);
+INSERT INTO AnyQuestionCard (value) VALUES (500000);
+INSERT INTO AnyQuestionCard (value) VALUES (500000);
+INSERT INTO AnyQuestionCard (value) VALUES (500000);
+INSERT INTO AnyQuestionCard (value) VALUES (500000);
+INSERT INTO AnyQuestionCard (value) VALUES (500000);
+INSERT INTO AnyQuestionCard (value) VALUES (500000);
+INSERT INTO AnyQuestionCard (value) VALUES (500000);
+INSERT INTO AnyQuestionCard (value) VALUES (500000);
+INSERT INTO AnyQuestionCard (value) VALUES (500000);
+
+
+
+
+
+
 INSERT INTO `Education` (`education_id`, `name`) VALUES (NULL, 'Trung học cơ sở');
 INSERT INTO `Education` (`education_id`, `name`) VALUES (NULL, 'Trung học phổ thông');
 INSERT INTO `Education` (`education_id`, `name`) VALUES (NULL, 'Trung cấp');
@@ -254,5 +421,12 @@ INSERT INTO `User` (`user_id`, `Password`, `FullName`, `avatar`, `Address`, `Ema
 INSERT INTO `User` (`user_id`, `Password`, `FullName`, `avatar`, `Address`, `Email`, `money`) VALUES ('cong2', '1', 'Nguyễn Hữu Công 2', NULL, 'Cà Mau', 'haucong@gmail.com', '50000');
 INSERT INTO `User` (`user_id`, `Password`, `FullName`, `avatar`, `Address`, `Email`, `money`) VALUES ('anh2', '1', 'Cái Thế Đức Anh 2', NULL, 'Phan Thiết', 'caitheducanh@gmail.com', '50000');
 INSERT INTO `User` (`user_id`, `Password`, `FullName`, `avatar`, `Address`, `Email`, `money`) VALUES ('minh2', '1', 'Nguyễn Thái Minh 2', NULL, 'Bắc Kinh', 'nguyenthaiminh@gmail.com', '50000');
+
+
+INSERT INTO `Question` (`question_id`, `field_id`, `title`, `image`, `detailed_description`, `money`, `user_id`) VALUES (NULL, '6', 'Không hiểu về địa chỉ IPv6', NULL, 'Biết sơ sơ thôi thầy ạ', '15000', 'duong');
+INSERT INTO `Conversation` (`conversation_id`, `question_id`, `id_user`, `id_expert`, `starttime`, `finishtime`, `public`, `star`) VALUES (NULL, '1', 'duong', 'phamminhtuan', current_timestamp(), NULL, '1', '5');
+
+
+
 
 

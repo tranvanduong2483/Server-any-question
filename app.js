@@ -206,7 +206,7 @@ io.sockets.on('connection', function (socket) {
         const message = JSON.parse(message_json);
 
         if (message.typeImage === false) {
-            const SQL = `INSERT INTO Messages (conversation_id, sender, message, typeImage, time) VALUES ('${message.conversation_id}', '${message.sender}', '${message.message}', '${message.typeImage === true ? 1 : 0}', '2019-11-12 00:00:00');`;
+            const SQL = `INSERT INTO Messages (conversation_id, sender, message, typeImage) VALUES ('${message.conversation_id}', '${message.sender}', '${message.message}', '${message.typeImage === true ? 1 : 0}');`;
             con.query(SQL, function (err, result) {
                 if (err) throw err;
                 socket.to(socket.id_ketnoi).emit("server-send-message", {message: message_json});
@@ -216,7 +216,7 @@ io.sockets.on('connection', function (socket) {
                 if (err) return;
                 message.message = filename;
 
-                const SQL = `INSERT INTO Messages (conversation_id, sender, message, typeImage, time) VALUES ('${message.conversation_id}', '${message.sender}', '${message.message}', '${message.typeImage === true ? 1 : 0}', '2019-11-12 00:00:00');`;
+                const SQL = `INSERT INTO Messages (conversation_id, sender, message, typeImage) VALUES ('${message.conversation_id}', '${message.sender}', '${message.message}', '${message.typeImage === true ? 1 : 0}');`;
 
                 con.query(SQL, function (err, result) {
                     if (err) throw err;
@@ -364,7 +364,7 @@ io.sockets.on('connection', function (socket) {
             avatar = socket.avatar;
 
 
-            const SQL = `INSERT INTO Conversation (question_id, id_user, id_expert, starttime, public) VALUES ('${PhanHoiYeuCauGiaiDap.question_id}', '${PhanHoiYeuCauGiaiDap.from}', '${socket.account}', '2019-11-06 00:00:00', '1');`;
+            const SQL = `INSERT INTO Conversation (question_id, id_user, id_expert, public) VALUES ('${PhanHoiYeuCauGiaiDap.question_id}', '${PhanHoiYeuCauGiaiDap.from}', '${socket.account}', '1');`;
 
 
             con.query(SQL, function (err, result) {
