@@ -210,6 +210,8 @@ io.sockets.on('connection', function (socket) {
             con.query(SQL, function (err, result) {
                 if (err) throw err;
                 socket.to(socket.id_ketnoi).emit("server-send-message", {message: message_json});
+                console.log(message_json);
+
             });
         } else {
             saveImage(message.message, function (err, filename) {
@@ -221,6 +223,8 @@ io.sockets.on('connection', function (socket) {
                 con.query(SQL, function (err, result) {
                     if (err) throw err;
                     socket.to(socket.id_ketnoi).emit("server-send-message", {message: message_json});
+                    console.log("tin nhan image");
+
                 });
 
             });
@@ -655,6 +659,7 @@ io.sockets.on('connection', function (socket) {
     socket.on('client-roi-cuoc-thao-luan', function (conversation_id) {
         socket.to(socket.id_ketnoi).emit("server-bao-nguoi-kia-da-roi-cuoc-thao-luan",conversation_id);
         socket.id_ketnoi = undefined;
+        console.log('client-roi-cuoc-thao-luan');
     });
 });
 
