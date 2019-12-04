@@ -225,6 +225,8 @@ io.sockets.on('connection', function (socket) {
                     socket.to(socket.id_ketnoi).emit("server-send-message", {message: message_json});
                     console.log("tin nhan image");
 
+                    socket.emit("send-image-complete",arguments[1]);
+
                 });
 
             });
