@@ -553,7 +553,7 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('get-list-history', function () {
         console.log("get-list-history")
-        let SQL = `SELECT Conversation.conversation_id, Question.title, Field.name, Conversation.star
+        let SQL = `SELECT Conversation.conversation_id, Question.title, Field.name, Conversation.star, Conversation.id_user, Conversation.id_expert
     FROM Question
     INNER JOIN Conversation ON Conversation.question_id = Question.question_id
     INNER JOIN Field ON Question.field_id = Field.field_id
