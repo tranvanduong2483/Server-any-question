@@ -615,11 +615,17 @@ io.sockets.on('connection', function (socket) {
                             if (!err) {
                                 rows[i].message = data.toString('base64');
                                 socket.emit("server-sent-conversation-history", rows[i]);
-                                console.log(rows[i]);
+                                //console.log(rows[i]);
+                            }else {
+                                console.log("Ảnh bị lỗi khi load lịch sử thỏa luận, conversation_id = " + conversation_id);
+                                socket.emit("server-sent-conversation-history", rows[i]);
                             }
                         });
                     } else {
                         socket.emit("server-sent-conversation-history", rows[i]);
+
+                        console.log(rows[i]);
+
                     }
 
                 }
