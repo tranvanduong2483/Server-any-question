@@ -732,6 +732,25 @@ io.sockets.on('connection', function (socket) {
     });
 
 
+    socket.on('expert-refresh-information', function (expert_id) {
+        const SQL = `SELECT expert_id,money FROM Expert WHERE expert_id = '${expert_id}';`;
+        con.query(SQL, function (err, rows, result) {
+
+            if (err){
+                console.log("Lỗi expert-refresh-information")
+                return;
+            }
+            console.log(rows);
+
+
+
+            if (rows.length !== 0) {
+                socket.emit('server-sent-expert-balance',rows[0].expert_id,rows[0].money );
+            }
+        });
+    });
+
+
 });
 
 
