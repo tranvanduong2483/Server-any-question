@@ -413,8 +413,8 @@ io.sockets.on('connection', function (socket) {
 
     });
 
-    socket.on('user-ready-thao-luan', function (data) {
-        socket.to(socket.id_ketnoi).emit("user-ready-thao-luan", {message: data});
+    socket.on('user-ready-thao-luan', function (user_id) {
+        socket.to(socket.id_ketnoi).emit("user-ready-thao-luan", {message: user_id});
     });
 
     socket.on('client-get-education', function (data) {
@@ -674,6 +674,64 @@ io.sockets.on('connection', function (socket) {
         socket.id_ketnoi = undefined;
         console.log('client-roi-cuoc-thao-luan');
     });
+
+
+    socket.on('user-nap-tien', function () {
+        const user_id = arguments[0];
+        const serial = arguments[1];
+        const card_code = arguments[2];
+
+        const SQL = `INSERT INTO CardUsageHistory (user_id, card_id)
+                SELECT '${user_id}', card_id
+                From AnyQuestionCard
+                WHERE card_id in (
+                    SELECT card_id
+                    FROM AnyQuestionCard
+                    WHERE serial ='${serial}' and card_code ='${card_code}' 
+                    and  card_id not in (SELECT card_id FROM CardUsageHistory)
+                );`;
+
+        con.query(SQL, function (err, rows, result) {
+            if (rows.affectedRows !== 0) {
+                const SQL = `SELECT value FROM AnyQuestionCard 
+                            WHERE serial ='${serial}' and card_code ='${card_code}'`;
+                con.query(SQL, function (err, rows, result) {
+                    if (rows.affectedRows !== 0) {
+                        console.log(user_id+": nạp thành công "+ rows[0].value);
+                        socket.emit('user-nap-tien-status', user_id, rows[0].value);
+
+
+                        const SQL = `SELECT user_id,money FROM User WHERE user_id = '${user_id}';`;
+                        con.query(SQL, function (err, rows, result) {
+                            console.log(rows);
+                            if (rows.length !== 0) {
+                                socket.emit('server-sent-balance',rows[0].user_id,rows[0].money );
+                            }
+                        });
+
+
+
+                    } else {
+                        socket.emit('user-nap-tien-status', user_id, -2);
+                    }
+                });
+            } else {
+                socket.emit('user-nap-tien-status', user_id, -1);
+            }
+        });
+    });
+
+    socket.on('user-refresh-information', function (user_id) {
+        const SQL = `SELECT user_id,money FROM User WHERE user_id = '${user_id}';`;
+        con.query(SQL, function (err, rows, result) {
+            console.log(rows);
+            if (rows.length !== 0) {
+                socket.emit('server-sent-balance',rows[0].user_id,rows[0].money );
+            }
+        });
+    });
+
+
 });
 
 

@@ -616,8 +616,6 @@ CREATE TABLE `Messages` (
 );
 
 
-
-
 DELIMITER $$
 CREATE TRIGGER after_insert_Messages
   after INSERT ON Messages
