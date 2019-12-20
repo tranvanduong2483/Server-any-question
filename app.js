@@ -6,7 +6,7 @@ mysql = require('mysql');
 fs = require("fs");
 path = require('path');
 
-app.set('port', process.env.PORT || 26398); //<--- replace with your port number
+app.set('port', process.env.PORT || 3000); //<--- replace with your port number
 
 // Server
 server.listen(app.get('port'), function () {
@@ -15,15 +15,24 @@ server.listen(app.get('port'), function () {
 
 module.exports = app;
 
-
-con = mysql.createConnection({
+const mySQL_online_config= {
     host: "db4free.net",
     port: 3306,
     user: "tranvanduong",
     password: "123456789",
     database: "anyquestion"
-});
+};
 
+const mySQL_local_config= {
+    host: "localhost",
+    port: 3306,
+    user: "root",
+    password: "",
+    database: "anyquestion"
+};
+
+con = mysql.createConnection(mySQL_online_config);
+//con = mysql.createConnection(mySQL_local_config);
 
 con.connect(function (err) {
     if (err) throw err;

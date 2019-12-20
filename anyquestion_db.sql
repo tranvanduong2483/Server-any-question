@@ -120,8 +120,8 @@ ALTER TABLE `Security` ADD FOREIGN KEY (`security_question_id`) REFERENCES `Secu
 
 CREATE TABLE `AccessRights` (
   `right_id` int PRIMARY KEY AUTO_INCREMENT,
-  `RightName` varchar(50) NOT NULL,
-  `Description` varchar(50)
+  `RightName` varchar(500) NOT NULL,
+  `Description` varchar(500)
 );
 
 CREATE TABLE `Admin` (
@@ -241,7 +241,6 @@ ALTER TABLE `Report` ADD FOREIGN KEY (`conversation_id`) REFERENCES `Conversatio
 
 ALTER TABLE `Report` ADD FOREIGN KEY (`from_id`) REFERENCES `User` (`user_id`);
 
-ALTER TABLE `Report` ADD FOREIGN KEY (`from_id`) REFERENCES `Expert` (`expert_id`);
 
 ALTER TABLE `Question` ADD FOREIGN KEY (`field_id`) REFERENCES `Field` (`field_id`);
 
@@ -277,7 +276,7 @@ CREATE TABLE `BXH` (
   `expert_id` varchar(50) NULL,
   `conversation_number` int DEFAULT 0,
   `AverageStars` float DEFAULT 0,
-   CONSTRAINT FK_PersonOrde777r FOREIGN KEY (expert_id) REFERENCES Expert(expert_id)
+   CONSTRAINT FK_PersonOrde777r FOREIGN KEY (expert_id) REFERENCES Expert(expert_id) ON DELETE CASCADE
 );
 
 
@@ -289,9 +288,6 @@ DELIMITER $$
 
 	END$$
 DELIMITER ;
-
-
-
 
 
 INSERT INTO AnyQuestionCard (value) VALUES (10000);
@@ -430,5 +426,25 @@ INSERT INTO `Conversation` (`conversation_id`, `question_id`, `id_user`, `id_exp
 INSERT INTO `Messages` (`messages_id`, `conversation_id`, `sender`, `message`, `typeImage`, `time`) VALUES (NULL, '1', 'duong', 'Em chao thay', '0', CURRENT_TIMESTAMP);
 
 
+INSERT INTO `Question` (`question_id`, `field_id`, `title`, `image`, `detailed_description`, `money`, `user_id`) VALUES (NULL, '6', 'Giải phương trình bậc 2', NULL, 'Biết sơ sơ thôi thầy ạ', '15000', 'anh');
+INSERT INTO `Conversation` (`conversation_id`, `question_id`, `id_user`, `id_expert`, `starttime`, `finishtime`, `public`, `star`) VALUES (NULL, '1', 'anh', 'phamminhtuan2', current_timestamp(), NULL, '1', '5');
+INSERT INTO `Messages` (`messages_id`, `conversation_id`, `sender`, `message`, `typeImage`, `time`) VALUES (NULL, '1', 'duong', 'Em chao cô', '0', CURRENT_TIMESTAMP);
 
+
+INSERT INTO `AccessRights` (`right_id`, `RightName`, `Description`) VALUES (NULL, 'Toàn quyền', 'Có mọi quyền về hệ thống');
+INSERT INTO `AccessRights` (`right_id`, `RightName`, `Description`) VALUES (NULL, 'Duyệt khiếu nại, duyệt chuyên gia', 'Có quyền về hủy bỏ và chấp nhận chuyên gia, giải quyết khiếu nại');
+
+
+
+INSERT INTO `Admin` (`admin_id`, `Password`, `FullName`, `right_id`) VALUES ('admin', '1', 'Võ Đức Hoàng', '1');
+
+INSERT INTO `Admin` (`admin_id`, `Password`, `FullName`, `right_id`) VALUES ('admin2', '1', 'Lê Thị Mỹ Hạnh', '2');
+
+INSERT INTO `Admin` (`admin_id`, `Password`, `FullName`, `right_id`) VALUES ('admin3', '1', 'Đặng Hoài Phương', '2');
+
+INSERT INTO `Admin` (`admin_id`, `Password`, `FullName`, `right_id`) VALUES ('admin4', '1', 'Phạm Minh Tuấn', '2');
+
+
+INSERT INTO `Report` (`report_id`, `from_id`, `conversation_id`, `reason`) VALUES (NULL, 'duong', '1', 'Chuyên gia trả lời nhảm');
+INSERT INTO `Report` (`report_id`, `from_id`, `conversation_id`, `reason`) VALUES (NULL, 'anh', '2', 'Chuyên gia trả lời sai');
 
