@@ -15,7 +15,7 @@ server.listen(app.get('port'), function () {
 
 module.exports = app;
 
-const mySQL_online_config= {
+const mySQL_online_config = {
     host: "db4free.net",
     port: 3306,
     user: "tranvanduong",
@@ -23,7 +23,7 @@ const mySQL_online_config= {
     database: "anyquestion"
 };
 
-const mySQL_local_config= {
+const mySQL_local_config = {
     host: "localhost",
     port: 3306,
     user: "root",
@@ -39,10 +39,11 @@ con.connect(function (err) {
     console.log("MySQL ready!");
 });
 
-
 list_expert_ready = [];
+
 list_login = [];
 
+list_field = [];
 
 function remove_list_login(socket) {
     for (let i = 0; i < list_login.length; i++) {
@@ -69,7 +70,7 @@ function getIDconnectionfromUsername(Username) {
 }
 
 function getSocketFomIdSocket(IdSocket) {
-    if (IdSocket === undefined || IdSocket==null) return null;
+    if (IdSocket === undefined || IdSocket == null) return null;
     if (list_login.length === 0) return null;
     for (let i = 0; i < list_login.length; i++)
         if (list_login[i].id === IdSocket)
@@ -114,7 +115,6 @@ function saveImage(str_image, callback) {
         return callback(false, filename)
     });
 }
-
 
 io.sockets.on('connection', function (socket) {
 
@@ -216,41 +216,12 @@ io.sockets.on('connection', function (socket) {
         if (socket.id_ketnoi === undefined || socket.id_ketnoi === null) return;
         const message = JSON.parse(message_json);
 
-        if (message.typeImage === false) {
-            const SQL = `INSERT INTO Messages (conversation_id, sender, message, typeImage) VALUES ('${message.conversation_id}', '${message.sender}', '${message.message}', '${message.typeImage === true ? 1 : 0}');`;
-            con.query(SQL, function (err, result) {
-                if (err) throw err;
-                socket.to(socket.id_ketnoi).emit("server-send-message", {message: message_json});
-                console.log(message_json);
-
-            });
-        } else {
-            saveImage(message.message, function (err, filename) {
-                if (err) {
-                    console.log("Lỗi gửi ảnh, không lưu đc ảnh.");
-                    socket.emit("send-image-complete",position,"error");
-                    return;
-                }
-                message.message = filename;
-
-                const SQL = `INSERT INTO Messages (conversation_id, sender, message, typeImage) VALUES ('${message.conversation_id}', '${message.sender}', '${message.message}', '${message.typeImage === true ? 1 : 0}');`;
-
-                con.query(SQL, function (err, result) {
-                    if (err) {
-                        console.log("Lỗi gửi ảnh, không lưu filename vào MySQL.");
-                        socket.emit("send-image-complete",position,"error");
-                        throw err;
-                    }
-                    socket.to(socket.id_ketnoi).emit("server-send-message", {message: message_json});
-                    console.log("tin nhan image - " + position);
-
-                    console.log("Gửi ảnh lên server ok");
-                    socket.emit("send-image-complete",position,"ok");
-
-                });
-
-            });
-        }
+        const SQL = `INSERT INTO Messages (conversation_id, sender, message, typeImage) VALUES ('${message.conversation_id}', '${message.sender}', '${message.message}', '${message.typeImage === true ? 1 : 0}');`;
+        con.query(SQL, function (err, result) {
+            if (err) throw err;
+            socket.to(socket.id_ketnoi).emit("server-send-message", {message: message_json});
+            console.log(message_json);
+        });
     });
 
     socket.on('expert-send-ready', function () {
@@ -364,7 +335,7 @@ io.sockets.on('connection', function (socket) {
                     TurnReady(socket_expert, false);
                     socket.id_ketnoi = socket_expert.id;
 
-                    console.log("id ketnoi: "+socket.id_ketnoi);
+                    console.log("id ketnoi: " + socket.id_ketnoi);
                     socket.to(socket.id_ketnoi).emit("send-question-to-expert", {question: question});
                 });
             });
@@ -402,7 +373,7 @@ io.sockets.on('connection', function (socket) {
 
                 let socketKetNoi = getSocketFomIdSocket(socket.id_ketnoi);
 
-                if ( socketKetNoi.id_ketnoi !== socket.id || socketKetNoi.id !== socket.id_ketnoi || socketKetNoi.id_ketnoi === null || socketKetNoi.id_ketnoi === undefined){
+                if (socketKetNoi.id_ketnoi !== socket.id || socketKetNoi.id !== socket.id_ketnoi || socketKetNoi.id_ketnoi === null || socketKetNoi.id_ketnoi === undefined) {
                     socket.emit("server-send-ghep-doi-khong-thanh-cong");
                     socket.id_ketnoi = undefined;
                     return;
@@ -594,7 +565,7 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('get-introdution-expert', function (account) {
-        console.log(account+": get-introdution-expert");
+        console.log(account + ": get-introdution-expert");
         let SQL = `SELECT keywords, introduction_message FROM Introduction WHERE expert_id = '${account}'`;
         console.log(SQL);
         con.query(SQL, function (err, rows, result) {
@@ -624,42 +595,14 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('get-conversation-history', function (conversation_id) {
-
         console.log("get-conversation-history");
-
         let SQL = `SELECT * FROM Messages WHERE conversation_id = '${conversation_id}'`;
-        console.log(SQL)
         con.query(SQL, function (err, rows, result) {
-            let json;
             if (rows.length !== 0) {
-
                 for (let i = 0; i < rows.length; i++) {
                     rows[i].typeImage = rows[i].typeImage === 1;
-
-                    if (rows[i].typeImage === true) {
-                        fs.readFile(rows[i].message, function (err, data) {
-                            if (!err) {
-                                rows[i].message = data.toString('base64');
-                            }else {
-                                rows[i].message = "";
-                                console.log("Ảnh bị lỗi khi load lịch sử thỏa luận, conversation_id = " + conversation_id);
-                            }
-
-                            socket.emit("server-sent-conversation-history", rows[i]);
-
-                        });
-                    } else {
-
-
-                        socket.emit("server-sent-conversation-history", rows[i]);
-
-                       // console.log(rows[i]);
-
-                    }
-
+                    socket.emit("server-sent-conversation-history", rows[i]);
                 }
-
-
             }
         });
     });
@@ -679,11 +622,10 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('client-roi-cuoc-thao-luan', function (conversation_id) {
-        socket.to(socket.id_ketnoi).emit("server-bao-nguoi-kia-da-roi-cuoc-thao-luan",conversation_id);
+        socket.to(socket.id_ketnoi).emit("server-bao-nguoi-kia-da-roi-cuoc-thao-luan", conversation_id);
         socket.id_ketnoi = undefined;
         console.log('client-roi-cuoc-thao-luan');
     });
-
 
     socket.on('user-nap-tien', function () {
         const user_id = arguments[0];
@@ -706,7 +648,7 @@ io.sockets.on('connection', function (socket) {
                             WHERE serial ='${serial}' and card_code ='${card_code}'`;
                 con.query(SQL, function (err, rows, result) {
                     if (rows.affectedRows !== 0) {
-                        console.log(user_id+": nạp thành công "+ rows[0].value);
+                        console.log(user_id + ": nạp thành công " + rows[0].value);
                         socket.emit('user-nap-tien-status', user_id, rows[0].value);
 
 
@@ -714,10 +656,9 @@ io.sockets.on('connection', function (socket) {
                         con.query(SQL, function (err, rows, result) {
                             console.log(rows);
                             if (rows.length !== 0) {
-                                socket.emit('server-sent-balance',rows[0].user_id,rows[0].money );
+                                socket.emit('server-sent-balance', rows[0].user_id, rows[0].money);
                             }
                         });
-
 
 
                     } else {
@@ -735,33 +676,26 @@ io.sockets.on('connection', function (socket) {
         con.query(SQL, function (err, rows, result) {
             console.log(rows);
             if (rows.length !== 0) {
-                socket.emit('server-sent-balance',rows[0].user_id,rows[0].money );
+                socket.emit('server-sent-balance', rows[0].user_id, rows[0].money);
             }
         });
     });
-
 
     socket.on('expert-refresh-information', function (expert_id) {
         const SQL = `SELECT expert_id,money FROM Expert WHERE expert_id = '${expert_id}';`;
         con.query(SQL, function (err, rows, result) {
 
-            if (err){
+            if (err) {
                 console.log("Lỗi expert-refresh-information")
                 return;
             }
             console.log(rows);
 
 
-
             if (rows.length !== 0) {
-                socket.emit('server-sent-expert-balance',rows[0].expert_id,rows[0].money );
+                socket.emit('server-sent-expert-balance', rows[0].expert_id, rows[0].money);
             }
         });
     });
 
-
 });
-
-
-
-
