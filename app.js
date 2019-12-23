@@ -37,6 +37,26 @@ con = mysql.createConnection(mySQL_online_config);
 con.connect(function (err) {
     if (err) throw err;
     console.log("MySQL ready!");
+
+    con.query('SELECT * FROM Messages', function (err, rows) {
+
+        for (let i=0; i<rows.length; i++){
+            let message = {};
+            message.conversation_id = rows[i].conversation_id;
+            message.sender = rows[i].sender;
+            message.message = rows[i].message;
+            message.typeImage = (rows[i].typeImage===1);
+            message.time = rows[i].time;
+            list_message.push(message);
+        }
+        console.log("Đã load danh sách message");
+
+    });
+
+    con.query("SELECT * FROM Field", function (err, rows) {
+        list_field = rows;
+        console.log("Đã load danh sách lĩnh vực");
+    });
 });
 
 list_expert_ready = [];
@@ -44,6 +64,21 @@ list_expert_ready = [];
 list_login = [];
 
 list_field = [];
+
+list_message = [];
+
+
+function getListmesageFromconvID(conversation_id) {
+    let list_tmp = [];
+
+    console.log("####" + conversation_id);
+    for (let i = 0; i < list_message.length; i++) {
+        if (list_message[i].conversation_id === conversation_id) {
+            list_tmp.push(list_message[i]);
+        }
+    }
+    return list_tmp;
+}
 
 function remove_list_login(socket) {
     for (let i = 0; i < list_login.length; i++) {
@@ -210,17 +245,15 @@ io.sockets.on('connection', function (socket) {
 
     });
 
-    socket.on('client-send-message-to-other-people', function () {
-        const message_json = arguments[0];
-        const position = arguments[1];
+    socket.on('client-send-message-to-other-people', function (message_json) {
         if (socket.id_ketnoi === undefined || socket.id_ketnoi === null) return;
         const message = JSON.parse(message_json);
+        socket.to(socket.id_ketnoi).emit("server-send-message", {message: message_json});
 
         const SQL = `INSERT INTO Messages (conversation_id, sender, message, typeImage) VALUES ('${message.conversation_id}', '${message.sender}', '${message.message}', '${message.typeImage === true ? 1 : 0}');`;
         con.query(SQL, function (err, result) {
             if (err) throw err;
-            socket.to(socket.id_ketnoi).emit("server-send-message", {message: message_json});
-            console.log(message_json);
+            list_message.push(message);
         });
     });
 
@@ -408,13 +441,7 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('client-get-field', function (data) {
-        let SQL = "SELECT * FROM Field";
-        con.query(SQL, function (err, rows, result) {
-            if (rows.length !== 0) {
-                socket.emit('server-sent-field', rows);
-                console.log(data);
-            }
-        });
+                socket.emit('server-sent-field', list_field);
     });
 
     socket.on('client-get-security-question', function (data) {
@@ -578,7 +605,7 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('get-list-bxh', function () {
-        console.log("get-list-bxh")
+        console.log("get-list-bxh");
         let SQL = `SELECT Expert.expert_id,Field.name, BXH.conversation_number, BXH.AverageStars
             FROM Expert
             INNER JOIN BXH ON BXH.expert_id = Expert.expert_id
@@ -595,16 +622,9 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('get-conversation-history', function (conversation_id) {
-        console.log("get-conversation-history");
-        let SQL = `SELECT * FROM Messages WHERE conversation_id = '${conversation_id}'`;
-        con.query(SQL, function (err, rows, result) {
-            if (rows.length !== 0) {
-                for (let i = 0; i < rows.length; i++) {
-                    rows[i].typeImage = rows[i].typeImage === 1;
-                    socket.emit("server-sent-conversation-history", rows[i]);
-                }
-            }
-        });
+        console.log(socket.id +": lấy thông tin cuộc thảo luận mã " + conversation_id);
+        let list_message_from_convID = getListmesageFromconvID(conversation_id);
+        socket.emit("server-sent-conversation-history", list_message_from_convID);
     });
 
     socket.on('disconnect', function () {
@@ -697,5 +717,4 @@ io.sockets.on('connection', function (socket) {
             }
         });
     });
-
 });
